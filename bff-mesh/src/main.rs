@@ -84,7 +84,7 @@ impl Mesh {
 
         // sanity checks
         let n_vertices = vertices.len() as u32;
-        if indices.iter().any(|index| *index >= n_vertices) {
+        if indices.iter().any(|index| *index > n_vertices) {
             return Err(
                 "Some faces indices are out of bounds with the vertices array.".to_string(),
             );

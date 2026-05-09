@@ -1,11 +1,12 @@
 use std::io::BufRead;
 use std::{fs::File, io::BufReader, path::PathBuf};
 
-use crate::mesh::{Index, Vertex};
+pub type Point = nalgebra::Point3<f32>;
+pub type Index = u32;
 
 #[derive(Debug)]
 pub struct PolygonSoup {
-    pub vertices: Vec<Vertex>,
+    pub points: Vec<Point>,
     pub indices: Vec<Index>,
 }
 
@@ -18,7 +19,7 @@ impl PolygonSoup {
         let file = File::open(&path).map_err(|_| "Unable to open this file.".to_string())?;
         let reader = BufReader::new(file);
 
-        let mut vertices: Vec<Vertex> = Vec::new();
+        let mut points: Vec<Point> = Vec::new();
         let mut indices: Vec<Index> = Vec::new();
 
         for (line_no, line) in reader.lines().enumerate() {
@@ -51,7 +52,7 @@ impl PolygonSoup {
                     .parse()
                     .map_err(|_| format!("Invalid z value at line {}", line_no))?;
 
-                vertices.push(Vertex::new(x, y, z));
+                points.push(Point::new(x, y, z));
             } else if line.starts_with("f ") {
                 // For now, we do not evaluate obj files with face expressions as 0//2 or 0/12/34 for example
 
@@ -81,14 +82,6 @@ impl PolygonSoup {
             }
         }
 
-        // sanity checks
-        let n_vertices = vertices.len() as u32;
-        if indices.iter().any(|index| *index > n_vertices) {
-            return Err(
-                "Some faces indices are out of bounds with the vertices array.".to_string(),
-            );
-        }
-
-        Ok(Self { vertices, indices })
+        Ok(Self { points, indices })
     }
 }
